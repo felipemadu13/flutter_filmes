@@ -51,20 +51,21 @@ class _MovieFormScreenState extends State<MovieFormScreen> {
     }
   }
 
-  void _saveFilme() async {
-    if (_formKey.currentState!.validate()) {
-      Filme filme = Filme(
-        tituloController.text,
-        int.parse(anoController.text),
-        diretorController.text,
-        resumoController.text,
-        _nota,
-      );
+ void _saveFilme() async {
+  if (_formKey.currentState!.validate()) {
+    Filme filme = Filme(
+      tituloController.text,
+      int.parse(anoController.text),
+      diretorController.text,
+      resumoController.text,
+      _nota,
+    );
 
-      if (_image != null) {
-        filme.urlCartaz = _image!.path;
-      }
+    if (_image != null) {
+      filme.urlCartaz = _image!.path;
+    }
 
+    try {
       if (widget.filme == null) {
         await filmeHelper.saveFilme(filme);
       } else {
@@ -72,9 +73,25 @@ class _MovieFormScreenState extends State<MovieFormScreen> {
         await filmeHelper.updateFilme(filme);
       }
 
+ 
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Filme cadastrado com sucesso!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+
       Navigator.pop(context);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Erro ao cadastrar o filme!'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
+}
 
   @override
   Widget build(BuildContext context) {
