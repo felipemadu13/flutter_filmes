@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 import 'package:flutter_filmes/helper/filme_helper.dart';
 import 'package:flutter_filmes/domain/filme.dart';
 
@@ -19,7 +23,9 @@ class _MovieFormScreenState extends State<MovieFormScreen> {
   final TextEditingController diretorController = TextEditingController();
   final TextEditingController resumoController = TextEditingController();
   final TextEditingController anoController = TextEditingController();
-  final TextEditingController notaController = TextEditingController();
+
+  double _nota = 3.0;
+  File? _image;
 
   @override
   void initState() {
@@ -29,7 +35,19 @@ class _MovieFormScreenState extends State<MovieFormScreen> {
       diretorController.text = widget.filme!.direcao;
       resumoController.text = widget.filme!.resumo;
       anoController.text = widget.filme!.ano.toString();
-      notaController.text = widget.filme!.nota.toString();
+      _nota = widget.filme!.nota;
+      if (widget.filme!.urlCartaz.isNotEmpty) {
+        _image = File(widget.filme!.urlCartaz);
+      }
+    }
+  }
+
+  Future<void> _pickImage() async {
+    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _image = File(pickedFile.path);
+      });
     }
   }
 
@@ -40,8 +58,12 @@ class _MovieFormScreenState extends State<MovieFormScreen> {
         int.parse(anoController.text),
         diretorController.text,
         resumoController.text,
-        double.parse(notaController.text),
+        _nota,
       );
+
+      if (_image != null) {
+        filme.urlCartaz = _image!.path;
+      }
 
       if (widget.filme == null) {
         await filmeHelper.saveFilme(filme);
@@ -63,7 +85,22 @@ class _MovieFormScreenState extends State<MovieFormScreen> {
         child: Form(
           key: _formKey,
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
+              GestureDetector(
+                onTap: _pickImage,
+                child: _image != null
+                    ? Image.file(_image!, height: 150)
+                    : Container(
+                        height: 150,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey),
+                        ),
+                        child: const Icon(Icons.image, size: 50, color: Colors.grey),
+                      ),
+              ),
+              const SizedBox(height: 10),
               TextFormField(
                 controller: tituloController,
                 decoration: const InputDecoration(labelText: 'Título'),
@@ -73,6 +110,7 @@ class _MovieFormScreenState extends State<MovieFormScreen> {
                 controller: anoController,
                 decoration: const InputDecoration(labelText: 'Ano'),
                 keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 validator: (value) => value!.isEmpty ? 'Campo obrigatório' : null,
               ),
               TextFormField(
@@ -85,16 +123,35 @@ class _MovieFormScreenState extends State<MovieFormScreen> {
                 decoration: const InputDecoration(labelText: 'Resumo'),
                 validator: (value) => value!.isEmpty ? 'Campo obrigatório' : null,
               ),
-              TextFormField(
-                controller: notaController,
-                decoration: const InputDecoration(labelText: 'Nota'),
-                keyboardType: TextInputType.number,
-                validator: (value) => value!.isEmpty ? 'Campo obrigatório' : null,
+              const SizedBox(height: 20),
+              const Text(
+                'Nota do Filme',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 5),
+              RatingBar.builder(
+                initialRating: _nota,
+                minRating: 0,
+                direction: Axis.horizontal,
+                allowHalfRating: true,
+                itemCount: 5,
+                itemPadding: const EdgeInsets.symmetric(horizontal: 4.0),
+                itemBuilder: (context, _) => const Icon(
+                  Icons.star,
+                  color: Colors.amber,
+                ),
+                onRatingUpdate: (rating) {
+                  setState(() {
+                    _nota = rating;
+                  });
+                },
               ),
               const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _saveFilme,
-                child: const Text('Salvar'),
+              Center(
+                child: ElevatedButton(
+                  onPressed: _saveFilme,
+                  child: const Text('Salvar'),
+                ),
               ),
             ],
           ),
