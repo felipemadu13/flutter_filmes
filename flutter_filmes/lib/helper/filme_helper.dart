@@ -23,7 +23,7 @@ class FilmeHelper {
       await db.execute(
         '''
         CREATE TABLE ${FilmeContract.filmeTable}(
-          ${FilmeContract.idColumn} INTEGER PRIMARY KEY, 
+          ${FilmeContract.idColumn} INTEGER PRIMARY KEY AUTOINCREMENT, 
           ${FilmeContract.tituloColumn} TEXT, 
           ${FilmeContract.anoColumn} INTEGER, 
           ${FilmeContract.direcaoColumn} TEXT, 
@@ -38,7 +38,9 @@ class FilmeHelper {
 
   Future<Filme> saveFilme(Filme filme) async {
     Database dbFilme = await db;
-    filme.id = await dbFilme.insert(FilmeContract.filmeTable, filme.toMap());
+    Map<String, dynamic> filmeMap = filme.toMap();
+    filmeMap.remove(FilmeContract.idColumn);
+    filme.id = await dbFilme.insert(FilmeContract.filmeTable, filmeMap);
     return filme;
   }
 

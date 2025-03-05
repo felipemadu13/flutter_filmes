@@ -7,7 +7,7 @@ class Filme {
   String urlCartaz = '';
   double nota = 0;
 
-  Filme(this.titulo, this.direcao, this.ano, this.nota);
+  Filme(this.titulo, this.ano, this.direcao, this.resumo, this.nota);
 
   Filme.fromMap(Map map) {
     id = map[FilmeContract.idColumn];

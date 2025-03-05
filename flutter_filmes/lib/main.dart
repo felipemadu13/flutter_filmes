@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_filmes/movie_list.dart';
+import 'package:flutter_filmes/movie_list_screen.dart';
 import 'util.dart';
 import 'theme.dart';
 
@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: brightness == Brightness.light ? theme.light() : theme.dark(),
-      home: MovieList(),
+      home: MovieListScreen(),
     );
   }
 }
